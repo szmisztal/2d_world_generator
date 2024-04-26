@@ -400,7 +400,7 @@ GameObject:
   - component: {fileID: 844942270}
   - component: {fileID: 844942269}
   m_Layer: 0
-  m_Name: Tilemap
+  m_Name: TerrainTilemap
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -441,8 +441,8 @@ MonoBehaviour:
   hillTile: {fileID: 11400000, guid: b1a8420aa13501e48948cf86c6a44b2d, type: 2}
   mountainTile: {fileID: 11400000, guid: 204c602b72c72684392cf12a360ce66e, type: 2}
   snowTile: {fileID: 11400000, guid: 726205d7cfcf4134580b31bc0acdf632, type: 2}
-  worldWidth: 500
-  worldHeight: 250
+  worldWidth: 100
+  worldHeight: 50
   scale: 0.1
 --- !u!483693784 &844942270
 TilemapRenderer:

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -12,13 +13,16 @@ public class LayeredBiomeGenerator : MonoBehaviour
     public Tile mountainTile;
     public Tile snowTile;
 
-    public int worldWidth = 500;
-    public int worldHeight = 250;
-    public float scale = 0.1f; 
+    public int worldWidth = 100;
+    public int worldHeight = 50;
+    public float scale = 0.1f;
 
     void Start()
     {
         GenerateLayeredBiomes();
+        Tilemap terrainTilemap = GameObject.Find("terrainTilemap").GetComponent<Tilemap>();
+        Tilemap riverTilemap = GameObject.Find("riverTilemap").GetComponent<Tilemap>();
+        GenerateRivers(terrainTilemap, riverTilemap, waterTile, worldWidth, worldHeight, scale);
     }
 
     void GenerateLayeredBiomes()
@@ -38,11 +42,47 @@ public class LayeredBiomeGenerator : MonoBehaviour
         }
     }
 
+    void GenerateRivers(Tilemap terrainTilemap, Tilemap riverTilemap, Tile riverTile, int worldWidth, int worldHeight, float scale)
+    {
+        float riverOffsetX = Random.Range(0f, 1000f);
+        float riverOffsetY = Random.Range(0f, 1000f);
+
+        Vector3Int start = new Vector3Int(-worldWidth / 2, Random.Range(-worldHeight / 4, worldHeight / 4), 0);
+        Vector3Int currentPosition = start;
+
+        for (int i = 0; i < worldWidth; i++)
+        {
+            float perlinValue = Mathf.PerlinNoise((currentPosition.x + riverOffsetX) * scale, (currentPosition.y + riverOffsetY) * scale);
+            currentPosition.x++;
+
+            if (perlinValue < 0.4)
+            {
+                currentPosition.y--;
+            }
+            else if (perlinValue > 0.6)
+            {
+                currentPosition.y++;
+            }
+
+            if (currentPosition.x >= -worldWidth / 2 && currentPosition.x < worldWidth / 2 &&
+                currentPosition.y >= -worldHeight / 2 && currentPosition.y < worldHeight / 2)
+            {
+                HashSet<TileBase> impassableTiles = new HashSet<TileBase> { mountainTile, snowTile };
+
+                TileBase terrainTile = terrainTilemap.GetTile(currentPosition);
+                if (terrainTile != null && !impassableTiles.Contains(terrainTile))
+                {
+                    riverTilemap.SetTile(currentPosition, riverTile);
+                }
+            }
+        }
+    }
+
     Tile ChooseTile(float perlinValue)
     {
         if (perlinValue < 0.05f)
             return deepWaterTile;
-        else if (perlinValue < 0.1f)
+        else if (perlinValue < 0.15f)
             return waterTile;
         else if (perlinValue < 0.2f)
             return sandTile;
