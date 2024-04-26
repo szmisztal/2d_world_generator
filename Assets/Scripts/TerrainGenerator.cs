@@ -55,18 +55,21 @@ public class LayeredBiomeGenerator : MonoBehaviour
         float riverOffsetY = Random.Range(0f, 1000f);
 
         Vector3Int start = new Vector3Int(-worldWidth / 2, Random.Range(-worldHeight / 4, worldHeight / 4), 0);
-        Vector3Int currentPosition = start;
 
+        if (start.x < -worldWidth / 2 || start.x >= worldWidth / 2 || start.y < -worldHeight / 2 || start.y >= worldHeight / 2)
+            return; // Exit if start is out of bounds
+
+        Vector3Int currentPosition = start;
         for (int i = 0; i < worldWidth; i++)
         {
             float perlinValue = Mathf.PerlinNoise((currentPosition.x + riverOffsetX) * scale, (currentPosition.y + riverOffsetY) * scale);
             currentPosition.x++;
 
-            if (perlinValue < 0.4)
+            if (perlinValue < 0.35)
             {
-                currentPosition.y--;
+                currentPosition.y += Random.Range(-1, 2); 
             }
-            else if (perlinValue > 0.6)
+            else if (perlinValue > 0.65)
             {
                 currentPosition.y++;
             }
@@ -74,7 +77,7 @@ public class LayeredBiomeGenerator : MonoBehaviour
             if (currentPosition.x >= -worldWidth / 2 && currentPosition.x < worldWidth / 2 &&
                 currentPosition.y >= -worldHeight / 2 && currentPosition.y < worldHeight / 2)
             {
-                HashSet<TileBase> impassableTiles = new HashSet<TileBase> { mountainTile, snowTile };
+                HashSet<TileBase> impassableTiles = new HashSet<TileBase> { mountainTile, snowTile, deepWaterTile };
 
                 TileBase terrainTile = terrainTilemap.GetTile(currentPosition);
                 if (terrainTile != null && !impassableTiles.Contains(terrainTile))
@@ -90,6 +93,7 @@ public class LayeredBiomeGenerator : MonoBehaviour
         for (int i = 0; i < count; i++)
         {
             Vector3Int location = PlaceSettlement(settlementTilemap);
+            if (location == Vector3Int.zero) continue; 
             settlements.Add(location);
         }
     }
@@ -97,10 +101,15 @@ public class LayeredBiomeGenerator : MonoBehaviour
     Vector3Int PlaceSettlement(Tilemap settlementTilemap)
     {
         Vector3Int basePosition;
-        int tilesCount = Random.Range(1, 4); 
+        int tilesCount = Random.Range(1, 4);
+        int attempt = 0;
+        int maxAttempts = 100; 
 
         do
         {
+            if (++attempt > maxAttempts)
+                return Vector3Int.zero; 
+
             int x = Random.Range(-worldWidth / 2, worldWidth / 2);
             int y = Random.Range(-worldHeight / 2, worldHeight / 2);
             basePosition = new Vector3Int(x, y, 0);
@@ -132,14 +141,12 @@ public class LayeredBiomeGenerator : MonoBehaviour
 
     void GenerateRoadsBetweenSettlements()
     {
-        foreach (Vector3Int start in settlements)
+        int settlementCount = settlements.Count;
+        for (int i = 0; i < settlementCount; i++)
         {
-            foreach (Vector3Int end in settlements)
+            for (int j = i + 1; j < settlementCount; j++) 
             {
-                if (start != end)
-                {
-                    GenerateRoad(start, end);
-                }
+                GenerateRoad(settlements[i], settlements[j]);
             }
         }
     }
