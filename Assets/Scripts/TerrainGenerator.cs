@@ -149,13 +149,8 @@ public class LayeredBiomeGenerator : MonoBehaviour
             for (int j = i + 1; j < settlementCount; j++)
             {
                 List<Vector3Int> path = AStarPathfinder.FindPath(terrainTilemap, settlements[i], settlements[j], walkableTiles);
-                if (path.Count == 0)
+                if (path.Count > 0) // Jeœli znaleziono œcie¿kê, generuj drogê
                 {
-                    Debug.Log("No path found between " + settlements[i] + " and " + settlements[j]);
-                }
-                else
-                {
-                    Debug.Log("Path found between " + settlements[i] + " and " + settlements[j] + " with length: " + path.Count);
                     foreach (var point in path)
                     {
                         roadTilemap.SetTile(point, roadTile);

@@ -75,12 +75,7 @@ public static class AStarPathfinder
             Vector3Int neighbor = node + direction;
             if (tilemap.cellBounds.Contains(neighbor) && walkableTiles.Contains(tilemap.GetTile(neighbor)))
             {
-                Debug.Log("Neighbor at " + neighbor + " is walkable.");
                 yield return neighbor;
-            }
-            else
-            {
-                Debug.Log("Neighbor at " + neighbor + " is NOT walkable, Tile: " + tilemap.GetTile(neighbor));
             }
         }
     }
