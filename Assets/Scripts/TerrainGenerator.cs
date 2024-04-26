@@ -23,9 +23,11 @@ public class LayeredBiomeGenerator : MonoBehaviour
     public float scale = 0.1f;
 
     private List<Vector3Int> settlements = new List<Vector3Int>();
+    private HashSet<TileBase> walkableTiles;
 
     void Start()
     {
+        walkableTiles = new HashSet<TileBase> { grassTile, sandTile, hillTile, settlementTile };
         GenerateLayeredBiomes();
         GenerateRivers(terrainTilemap, riverTilemap, waterTile, worldWidth, worldHeight, scale);
         GenerateSettlements(2);
@@ -144,24 +146,22 @@ public class LayeredBiomeGenerator : MonoBehaviour
         int settlementCount = settlements.Count;
         for (int i = 0; i < settlementCount; i++)
         {
-            for (int j = i + 1; j < settlementCount; j++) 
+            for (int j = i + 1; j < settlementCount; j++)
             {
-                GenerateRoad(settlements[i], settlements[j]);
+                List<Vector3Int> path = AStarPathfinder.FindPath(roadTilemap, settlements[i], settlements[j], walkableTiles);
+                if (path.Count == 0)
+                {
+                    Debug.Log("No path found between " + settlements[i] + " and " + settlements[j]);
+                }
+                else
+                {
+                    Debug.Log("Path found between " + settlements[i] + " and " + settlements[j] + " with length: " + path.Count);
+                    foreach (var point in path)
+                    {
+                        roadTilemap.SetTile(point, roadTile);
+                    }
+                }
             }
-        }
-    }
-
-    void GenerateRoad(Vector3Int start, Vector3Int end)
-    {
-        int x = start.x;
-        int y = start.y;
-        while (x != end.x || y != end.y)
-        {
-            if (x < end.x) x++;
-            else if (x > end.x) x--;
-            if (y < end.y) y++;
-            else if (y > end.y) y--;
-            roadTilemap.SetTile(new Vector3Int(x, y, 0), roadTile);
         }
     }
 
