@@ -441,9 +441,9 @@ MonoBehaviour:
   hillTile: {fileID: 11400000, guid: b1a8420aa13501e48948cf86c6a44b2d, type: 2}
   mountainTile: {fileID: 11400000, guid: 204c602b72c72684392cf12a360ce66e, type: 2}
   snowTile: {fileID: 11400000, guid: 726205d7cfcf4134580b31bc0acdf632, type: 2}
-  worldWidth: 1000
-  worldHeight: 1000
-  scale: 1
+  worldWidth: 500
+  worldHeight: 250
+  scale: 0.1
 --- !u!483693784 &844942270
 TilemapRenderer:
   m_ObjectHideFlags: 0

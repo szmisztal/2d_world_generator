@@ -40,17 +40,19 @@ public class LayeredBiomeGenerator : MonoBehaviour
 
     Tile ChooseTile(float perlinValue)
     {
-        if (perlinValue < 0.1f)
-            return deepWaterTile; 
+        if (perlinValue < 0.05f)
+            return deepWaterTile;
+        else if (perlinValue < 0.1f)
+            return waterTile;
         else if (perlinValue < 0.2f)
-            return waterTile; 
-        else if (perlinValue < 0.3f)
             return sandTile;
         else if (perlinValue < 0.7f)
-            return grassTile; 
+            return grassTile;
         else if (perlinValue < 0.85f)
-            return hillTile; 
-        else
+            return hillTile;
+        else if (perlinValue < 0.95f)
             return mountainTile;
+        else
+            return snowTile;
     }
 }
