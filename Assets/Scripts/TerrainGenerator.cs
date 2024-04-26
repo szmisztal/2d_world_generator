@@ -4,7 +4,10 @@ using UnityEngine.Tilemaps;
 
 public class LayeredBiomeGenerator : MonoBehaviour
 {
-    public Tilemap tilemap;
+    public Tilemap terrainTilemap;
+    public Tilemap riverTilemap;
+    public Tilemap roadTilemap;
+    public Tilemap settlementTilemap;
     public Tile deepWaterTile;
     public Tile waterTile;
     public Tile sandTile;
@@ -12,17 +15,21 @@ public class LayeredBiomeGenerator : MonoBehaviour
     public Tile hillTile;
     public Tile mountainTile;
     public Tile snowTile;
+    public Tile settlementTile;
+    public Tile roadTile;
 
     public int worldWidth = 100;
     public int worldHeight = 50;
     public float scale = 0.1f;
 
+    private List<Vector3Int> settlements = new List<Vector3Int>();
+
     void Start()
     {
         GenerateLayeredBiomes();
-        Tilemap terrainTilemap = GameObject.Find("terrainTilemap").GetComponent<Tilemap>();
-        Tilemap riverTilemap = GameObject.Find("riverTilemap").GetComponent<Tilemap>();
         GenerateRivers(terrainTilemap, riverTilemap, waterTile, worldWidth, worldHeight, scale);
+        GenerateSettlements(2);
+        GenerateRoadsBetweenSettlements();
     }
 
     void GenerateLayeredBiomes()
@@ -35,9 +42,9 @@ public class LayeredBiomeGenerator : MonoBehaviour
             for (int y = -worldHeight / 2; y < worldHeight / 2; y++)
             {
                 float perlinValue = Mathf.PerlinNoise((x + offsetX) * scale, (y + offsetY) * scale);
-                perlinValue = Mathf.SmoothStep(0.0f, 1.0f, perlinValue); 
+                perlinValue = Mathf.SmoothStep(0.0f, 1.0f, perlinValue);
                 Tile chosenTile = ChooseTile(perlinValue);
-                tilemap.SetTile(new Vector3Int(x, y, 0), chosenTile);
+                terrainTilemap.SetTile(new Vector3Int(x, y, 0), chosenTile);
             }
         }
     }
@@ -75,6 +82,79 @@ public class LayeredBiomeGenerator : MonoBehaviour
                     riverTilemap.SetTile(currentPosition, riverTile);
                 }
             }
+        }
+    }
+
+    void GenerateSettlements(int count)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            Vector3Int location = PlaceSettlement(settlementTilemap);
+            settlements.Add(location);
+        }
+    }
+
+    Vector3Int PlaceSettlement(Tilemap settlementTilemap)
+    {
+        Vector3Int basePosition;
+        int tilesCount = Random.Range(1, 4); 
+
+        do
+        {
+            int x = Random.Range(-worldWidth / 2, worldWidth / 2);
+            int y = Random.Range(-worldHeight / 2, worldHeight / 2);
+            basePosition = new Vector3Int(x, y, 0);
+
+            TileBase terrainTile = terrainTilemap.GetTile(basePosition);
+            if (terrainTile != null && terrainTile != mountainTile && terrainTile != snowTile && terrainTile != deepWaterTile && terrainTile != waterTile)
+            {
+                settlementTilemap.SetTile(basePosition, settlementTile);
+                int placedTiles = 1;
+
+                while (placedTiles < tilesCount)
+                {
+                    Vector3Int offset = new Vector3Int(Random.Range(-1, 2), Random.Range(-1, 2), 0);
+                    Vector3Int newPosition = basePosition + offset;
+
+                    if (terrainTilemap.GetTile(newPosition) == grassTile || terrainTilemap.GetTile(newPosition) == sandTile)
+                    {
+                        settlementTilemap.SetTile(newPosition, settlementTile);
+                        placedTiles++;
+                    }
+                }
+
+                break;
+            }
+        } while (true);
+
+        return basePosition;
+    }
+
+    void GenerateRoadsBetweenSettlements()
+    {
+        foreach (Vector3Int start in settlements)
+        {
+            foreach (Vector3Int end in settlements)
+            {
+                if (start != end)
+                {
+                    GenerateRoad(start, end);
+                }
+            }
+        }
+    }
+
+    void GenerateRoad(Vector3Int start, Vector3Int end)
+    {
+        int x = start.x;
+        int y = start.y;
+        while (x != end.x || y != end.y)
+        {
+            if (x < end.x) x++;
+            else if (x > end.x) x--;
+            if (y < end.y) y++;
+            else if (y > end.y) y--;
+            roadTilemap.SetTile(new Vector3Int(x, y, 0), roadTile);
         }
     }
 
