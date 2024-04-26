@@ -59,7 +59,7 @@ public class LayeredBiomeGenerator : MonoBehaviour
         Vector3Int start = new Vector3Int(-worldWidth / 2, Random.Range(-worldHeight / 4, worldHeight / 4), 0);
 
         if (start.x < -worldWidth / 2 || start.x >= worldWidth / 2 || start.y < -worldHeight / 2 || start.y >= worldHeight / 2)
-            return; // Exit if start is out of bounds
+            return;
 
         Vector3Int currentPosition = start;
         for (int i = 0; i < worldWidth; i++)
@@ -148,7 +148,7 @@ public class LayeredBiomeGenerator : MonoBehaviour
         {
             for (int j = i + 1; j < settlementCount; j++)
             {
-                List<Vector3Int> path = AStarPathfinder.FindPath(roadTilemap, settlements[i], settlements[j], walkableTiles);
+                List<Vector3Int> path = AStarPathfinder.FindPath(terrainTilemap, settlements[i], settlements[j], walkableTiles);
                 if (path.Count == 0)
                 {
                     Debug.Log("No path found between " + settlements[i] + " and " + settlements[j]);
